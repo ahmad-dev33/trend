@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير التريندات</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { transition: transform .2s; }
+        .card:hover { transform: scale(1.03); }
+        .card-img-top {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        .platform-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4">📊 تقرير أحدث التريندات</h1>
+            <p class="lead text-muted">ملخص لأكثر المواضيع رواجاً على يوتيوب ومؤشرات جوجل</p>
+        </div>
+
+        {% if analysis %}
+        <div class="row text-center mb-5">
+            <!-- الأكثر مشاهدة -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">🔥 الأكثر مشاهدة</h5>
+                        <p class="card-text text-truncate">{{ analysis.most_viewed.title }}</p>
+                        <span class="badge bg-primary fs-6">{{ "{:,.0f}".format(analysis.most_viewed.views) }} مشاهدة</span>
+                        <a href="{{ analysis.most_viewed.url }}" target="_blank" class="btn btn-sm btn-outline-secondary mt-2">زيارة الرابط</a>
+                    </div>
+                </div>
+            </div>
+            <!-- الأكثر إيجابية -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">😍 الأكثر إيجابية</h5>
+                        <p class="card-text text-truncate">{{ analysis.most_loved.post.title }}</p>
+                        <span class="badge bg-success fs-6">تقييم: {{ "%.2f"|format(analysis.most_loved.sentiment) }}</span>
+                        <a href="{{ analysis.most_loved.post.url }}" target="_blank" class="btn btn-sm btn-outline-secondary mt-2">زيارة الرابط</a>
+                    </div>
+                </div>
+            </div>
+            <!-- الأكثر سلبية -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">😠 الأكثر سلبية</h5>
+                        <p class="card-text text-truncate">{{ analysis.most_hated.post.title }}</p>
+                        <span class="badge bg-danger fs-6">تقييم: {{ "%.2f"|format(analysis.most_hated.sentiment) }}</span>
+                        <a href="{{ analysis.most_hated.post.url }}" target="_blank" class="btn btn-sm btn-outline-secondary mt-2">زيارة الرابط</a>
+                    </div>
+                </div>
+            </div>
+            <!-- الكلمات المفتاحية -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">🔑 أبرز الكلمات</h5>
+                        <ul class="list-unstyled mb-0">
+                            {% for keyword, count in analysis.top_keywords %}
+                            <li>"{{ keyword }}" <span class="text-muted">({{ count }})</span></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <hr class="my-5">
+
+        <h2 class="text-center mb-4">قائمة جميع التريندات</h2>
+        <div class="row">
+            {% for post in posts %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <a href="{{ post.url }}" target="_blank" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm">
+                        <img src="{{ post.thumbnail or 'https://via.placeholder.com/400x225.png?text=No+Image' }}" class="card-img-top" alt="{{ post.title }}">
+                        <span class="badge 
+                            {% if post.platform == 'YouTube' %} bg-danger
+                            {% elif post.platform == 'Google Trends' %} bg-info
+                            {% else %} bg-secondary {% endif %}
+                            platform-badge">{{ post.platform }}</span>
+                        <div class="card-body">
+                            <h5 class="card-title" style="height: 3rem; overflow: hidden;">{{ post.title }}</h5>
+                            <p class="card-text text-muted"><small>{{ post.channel }} • {{ post.published_time }}</small></p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 text-center">
+                            <span class="badge rounded-pill bg-light text-dark">👁️ {{ "{:,.0f}".format(post.views) }}</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <div class="alert alert-warning text-center" role="alert">
+                    لم يتم العثور على أي تريندات. حاول تحديث الصفحة بعد قليل.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
